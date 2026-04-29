@@ -210,18 +210,58 @@ This project uses:
 	- truthful recall reached `1.00`, but deceptive recall collapsed to `0.03`
 	- the prompt style was too restrictive and removed useful uncertainty structure from the model output
 
+### Experiment 11: Cue-aware 3-label run
+
+- Project: `deception_detection_3label`
+- Model: `Qwen/Qwen3-VL-8B-Instruct`
+- Inputs: sampled video frames plus cue-aware prompt engineering, with predictions expanded to `truthful`, `deceptive`, or `dont know`
+- Results directory: `c:\Thesis\deception_detection_3label\results_qwen3vl8b_121`
+- Metrics:
+	- Accuracy: `0.2066`
+	- Macro-F1: `0.1814`
+	- Balanced Accuracy: `0.2053`
+- Prediction counts:
+	- `truthful`: `14`
+	- `deceptive`: `34`
+	- `dont know`: `73`
+- Inference:
+	- allowing a third abstention-style label caused the cue-aware system to overuse `dont know`
+	- this sharply reduced practical classification performance on the binary-ground-truth dataset
+	- the cue-aware prompt was much more uncertainty-sensitive than the binary version, but that uncertainty was not well calibrated
+
+### Experiment 12: Video-only 3-label run
+
+- Project: `deception_detection_video_only_3label`
+- Model: `Qwen/Qwen3-VL-8B-Instruct`
+- Inputs: sampled video frames only, with predictions expanded to `truthful`, `deceptive`, or `dont know`
+- Results directory: `c:\Thesis\deception_detection_video_only_3label\results_qwen3vl8b_121`
+- Metrics:
+	- Accuracy: `0.5041`
+	- Macro-F1: `0.2355`
+	- Balanced Accuracy: `0.5082`
+- Prediction counts:
+	- `truthful`: `118`
+	- `deceptive`: `1`
+	- `dont know`: `2`
+- Inference:
+	- the video-only 3-label variant barely used the third label at all
+	- it effectively collapsed to `truthful`, which preserved headline accuracy near chance but produced weak class discrimination
+	- compared with the cue-aware 3-label run, it was less uncertain but also much less sensitive to deceptive clips
+
 ## Consolidated Results Table
 
-| Experiment | Project | Model | Input style | Accuracy | Macro-F1 | AUC-ROC | Main behavior |
-| --- | --- | --- | --- | ---: | ---: | ---: | --- |
-| Initial baseline | cue-aware | Qwen2.5-VL-3B | original cue-aware | 0.5041 | 0.3352 | 0.5000 | collapsed to deceptive |
-| HFG only | cue-aware | Qwen2.5-VL-3B | hand/face/gaze only | 0.5041 | 0.3352 | 0.5000 | collapsed to deceptive |
-| Balanced 3B | cue-aware | Qwen2.5-VL-3B | balanced cue prompt | 0.5041 | 0.3495 | 0.5163 | still deceptive bias |
-| Balanced 7B | cue-aware | Qwen2.5-VL-7B | balanced cue prompt | 0.5289 | 0.4319 | 0.5481 | shifted to truthful bias |
-| All-gesture tuned 7B | cue-aware | Qwen2.5-VL-7B | strong all-gesture weighting | 0.4132 | 0.3562 | 0.4990 | over-corrected to deceptive |
-| All-gesture moderated 7B | cue-aware | Qwen2.5-VL-7B | moderated all-gesture prompt | 0.4876 | 0.4848 | 0.6434 | best 7B balance and best AUC |
-| Qwen3-VL-8B cue-aware | cue-aware | Qwen3-VL-8B | moderated cue-aware prompt | 0.5207 | 0.5132 | 0.6277 | best overall Macro-F1 |
-| Video-only strict prompt | video-only | Qwen3-VL-8B | frames only, one-word output | 0.5124 | 0.3669 | 0.5000 | collapsed to truthful |
+| Experiment | Project | Model | Input style | Accuracy | Macro-F1 | AUC-ROC | Balanced Acc. | Main behavior |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
+| Initial baseline | cue-aware | Qwen2.5-VL-3B | original cue-aware | 0.5041 | 0.3352 | 0.5000 | n/a | collapsed to deceptive |
+| HFG only | cue-aware | Qwen2.5-VL-3B | hand/face/gaze only | 0.5041 | 0.3352 | 0.5000 | n/a | collapsed to deceptive |
+| Balanced 3B | cue-aware | Qwen2.5-VL-3B | balanced cue prompt | 0.5041 | 0.3495 | 0.5163 | n/a | still deceptive bias |
+| Balanced 7B | cue-aware | Qwen2.5-VL-7B | balanced cue prompt | 0.5289 | 0.4319 | 0.5481 | n/a | shifted to truthful bias |
+| All-gesture tuned 7B | cue-aware | Qwen2.5-VL-7B | strong all-gesture weighting | 0.4132 | 0.3562 | 0.4990 | n/a | over-corrected to deceptive |
+| All-gesture moderated 7B | cue-aware | Qwen2.5-VL-7B | moderated all-gesture prompt | 0.4876 | 0.4848 | 0.6434 | n/a | best 7B balance and best AUC |
+| Qwen3-VL-8B cue-aware | cue-aware | Qwen3-VL-8B | moderated cue-aware prompt | 0.5207 | 0.5132 | 0.6277 | n/a | best overall Macro-F1 |
+| Video-only strict prompt | video-only | Qwen3-VL-8B | frames only, one-word output | 0.5124 | 0.3669 | 0.5000 | n/a | collapsed to truthful |
+| Qwen3-VL-8B cue-aware 3-label | cue-aware | Qwen3-VL-8B | cue-aware prompt with truthful/deceptive/dont know | 0.2066 | 0.1814 | n/a | 0.2053 | heavy dont know usage, weak overall discrimination |
+| Qwen3-VL-8B video-only 3-label | video-only | Qwen3-VL-8B | frames only with truthful/deceptive/dont know | 0.5041 | 0.2355 | n/a | 0.5082 | near-complete truthful bias |
 
 ## Main Inferences
 
